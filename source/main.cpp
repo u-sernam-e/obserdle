@@ -1,18 +1,15 @@
-#include "rayextended.h" 
 #include <vector>
 #include <string>
+#include "rayextended.h" 
 #include "basedata.h"
 #include "wordlist.h"
 #include "wordinput.h"
+#include "button.h"
 #if defined(PLATFORM_WEB)
 	#include <emscripten/emscripten.h>
 #endif
 
-/*
-checklist:
-only allow real words (HARD)
-victory/defeat screen
-copy and past prompt at bottom*/
+// update clipboard text to have proper #day and link
 
 struct GameData
 {
@@ -21,6 +18,7 @@ struct GameData
 	WordInput wrdInput;
 	std::vector<std::string> guessedWords{};
 	bool win{false};
+	Button copyButt;
 };
 
 GameData data;
@@ -46,7 +44,7 @@ Color letterState(char letter, int pos, std::string guess) // what a mess
 
 	int correctGuesses{};
 	for (int i{}; i < data.word.size(); ++i)
-		if (guess[i] == data.word[i]) correctGuesses += 1;
+		if (guess[i] == data.word[i] == letter) correctGuesses += 1;
 	
 	int possibleYellows{lettersInWord.size() - correctGuesses};
 
@@ -79,7 +77,7 @@ bool youWon()
 		for (int i{}; i < data.guessedWords[data.guessedWords.size()-1].size(); ++i)
 		{
 			Color letterColor{letterState(data.guessedWords[data.guessedWords.size()-1][i], i, data.guessedWords[data.guessedWords.size()-1])};
-			if (letterColor.r != 0 || letterColor.g != 228 || letterColor.b != 48)
+			if (letterColor != GREEN)
 				return false;
 		}
 		return true;
@@ -87,11 +85,43 @@ bool youWon()
 	return false;
 }
 
+bool youLost()
+{
+	return data.guessedWords.size() == 6 && !data.win;
+}
+
 void init()
 {
 	initBD(data.base);
+	data.copyButt = Button{{188, 528}, {184, 69}, LIGHTGRAY, Color{190, 190, 190, 255}, Color{210, 210, 210, 255}, "COPY RESULTS", WHITE, false, false, false, {}, false, &data.base.fs, "res/Roboto.ttf"};
 	data.wrdInput.init(&data.base);
 	data.word = getTodaysWord();
+}
+
+void setObserdleClipboardText()
+{
+	std::string text{"🦅Daily Obserdle🦅 #"};
+	text.append(std::to_string(getTheDay() - 19698));
+	if (youLost())
+		text.append(" 😢/6\n\n");
+	else
+		text.append(" " + std::to_string(data.guessedWords.size()) + "/6\n\n");
+
+	for (int i{}; i < data.guessedWords.size(); ++i)
+	{
+		for (int j{}; j < data.guessedWords[i].size(); ++j)
+		{
+			Color stateCol = letterState(data.guessedWords[i][j], j, data.guessedWords[i]);
+			if (stateCol == GRAY) text.append("⬛");
+			if (stateCol == GOLD) text.append("🟨");
+			if (stateCol == GREEN) text.append("🟩");
+
+		}
+		text.append("\n");
+	}
+	text.append("\n(link to observer website)");
+
+	SetClipboardText(text.c_str());
 }
 
 void update()
@@ -107,11 +137,17 @@ void update()
 		data.win = true;
 		data.wrdInput.win();
 	}
+	if (data.win || youLost())
+	{
+		data.copyButt.update();
+		if (data.copyButt.pressed())
+			setObserdleClipboardText();
+	}
 }
 
 void drawObserdleText()
 {
-	DrawTextEx(data.base.fs.get("res/Roboto.ttf", false), "Obserdle!", {50, 10}, 100, 1, BLACK);
+	DrawTextEx(data.base.fs.get("res/Roboto.ttf", 75), "Obserdle!", {45, 7}, 75, 1, BLACK);
 }
 
 void drawSquares()
@@ -120,7 +156,7 @@ void drawSquares()
 	{
 		for (int j{}; j < 5; ++j)
 		{
-			DrawRectangle(j*100+5, i*100+105, 90, 90, Color{10, 30, 20, 100});
+			DrawRectangle(j*75+2, i*75+79, 71, 71, Color{10, 30, 20, 100});
 		}
 	}
 }
@@ -131,7 +167,7 @@ void drawColoredSquares()
 	{
 		for (int j{}; j < data.guessedWords[i].size(); ++j)
 		{
-			DrawRectangle(j*100+5, i*100+105, 90, 90, letterState(data.guessedWords[i][j], j, data.guessedWords[i]));
+			DrawRectangle(j*75+2, i*75+79, 71, 71, letterState(data.guessedWords[i][j], j, data.guessedWords[i]));
 		}
 	}
 }
@@ -142,21 +178,19 @@ void drawGuessedWords()
 	{
 		for (int j{}; j < data.guessedWords[i].size(); ++j)
 		{
-			DrawTextEx(data.base.fs.get("res/Roboto.ttf", false), data.guessedWords[i].substr(j, 1).c_str(), {20 + 100*j, 100 + 100*i}, 100, 0, BLACK);
+			DrawTextEx(data.base.fs.get("res/Roboto.ttf", 75), data.guessedWords[i].substr(j, 1).c_str(), {15 + 75*j, 75 + 75*i}, 75, 0, BLACK);
 		}
 	}
 }
 
 void drawWin()
 {
-	DrawRectangle(250 - 170, 400 - 50, 340, 100, DARKGREEN);
-	DrawTextEx(data.base.fs.get("res/Roboto.ttf", false), "You Won!", {250 - 160, 400 - 40}, 90, 0, WHITE);
+	DrawTextEx(data.base.fs.get("res/Roboto.ttf", 20), "Great work eagle!", {25, 600-47}, 20, 0, BLACK);
 }
 
 void drawLoss()
 {
-	DrawRectangle(250 - 170, 400 - 50, 340, 100, MAROON);
-	DrawTextEx(data.base.fs.get("res/Roboto.ttf", false), "You Lost!", {250 - 160, 400 - 40}, 90, 0, WHITE);
+	DrawTextEx(data.base.fs.get("res/Roboto.ttf", 20), (std::string("Nice try!\nCorrect word: " + data.word)).c_str(), {15, 600-62}, 20, 0, BLACK);
 }
 
 void draw()
@@ -170,7 +204,8 @@ void draw()
 	data.wrdInput.draw();
 	drawBD(data.base);
 	if (data.win) drawWin();
-	if (data.guessedWords.size() == 6) drawLoss();
+	if (youLost()) drawLoss();
+	if (data.win || youLost()) data.copyButt.draw();
 }
 
 void updateDrawFrame()
@@ -185,7 +220,7 @@ void updateDrawFrame()
 
 int main()
 {
-	InitWindow(500, 800, "Obserdle");
+	InitWindow(375, 600, "Obserdle");
     InitAudioDevice();
 	init();
 

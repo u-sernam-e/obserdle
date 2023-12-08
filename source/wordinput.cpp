@@ -49,15 +49,15 @@ void WordInput::draw()
 {
     if (!won)
     {
-        int yPos{100};
+        int yPos{75};
         for (int i{}; i < currentLine; ++i)
         {
-            yPos += 100;
+            yPos += 75;
         }
 
         for (int i{}; i < currentWord.size(); ++i)
         {
-            DrawTextEx(base->fs.get("res/Roboto.ttf", false), currentWord.substr(i, 1).c_str(), {20 + 100*i, yPos}, 100, 0, BLACK);
+            DrawTextEx(base->fs.get("res/Roboto.ttf", 75), currentWord.substr(i, 1).c_str(), {15 + 75*i, yPos}, 75, 0, BLACK);
         }
     }
 }

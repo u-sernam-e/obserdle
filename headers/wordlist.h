@@ -3,12 +3,17 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <iostream>
+
+int getTheDay()
+{
+    return (static_cast<int>(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())) - 18000)/86400;
+}
 
 std::string getTodaysWord()
 {
     static std::vector<std::string> words{
         "PROUD",
+        "CHOSE",
         "EAGLE",
         "BIRTH",
         "AHEAD",
@@ -503,11 +508,9 @@ std::string getTodaysWord()
         "ABUSE",
         "HAIRY",
         "TOWER",
-        "GREAT",
-        "CHOSE"
+        "GREAT"
     };
-    int day = static_cast<int>(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/86400);
-    return words[day%words.size()];
+    return words[getTheDay()%words.size()];
 }
 
 
