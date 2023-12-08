@@ -10,6 +10,8 @@
 #endif
 
 // update clipboard text to have proper #day and link
+// fix button thing
+
 
 struct GameData
 {
@@ -93,7 +95,7 @@ bool youLost()
 void init()
 {
 	initBD(data.base);
-	data.copyButt = Button{{188, 528}, {184, 69}, LIGHTGRAY, Color{190, 190, 190, 255}, Color{210, 210, 210, 255}, "COPY RESULTS", WHITE, false, false, false, {}, false, &data.base.fs, "res/Roboto.ttf"};
+	//data.copyButt = Button{{188, 528}, {184, 69}, LIGHTGRAY, Color{190, 190, 190, 255}, Color{210, 210, 210, 255}, "COPY RESULTS", WHITE, false, false, false, {}, false, &data.base.fs, "res/Roboto.ttf"};
 	data.wrdInput.init(&data.base);
 	data.word = getTodaysWord();
 }
@@ -135,13 +137,13 @@ void update()
 	if (youWon())
 	{
 		data.win = true;
-		data.wrdInput.win();
 	}
 	if (data.win || youLost())
 	{
-		data.copyButt.update();
-		if (data.copyButt.pressed())
-			setObserdleClipboardText();
+		data.wrdInput.endGame();
+		//data.copyButt.update();
+		//if (data.copyButt.pressed())
+			//setObserdleClipboardText();
 	}
 }
 
@@ -205,7 +207,7 @@ void draw()
 	drawBD(data.base);
 	if (data.win) drawWin();
 	if (youLost()) drawLoss();
-	if (data.win || youLost()) data.copyButt.draw();
+	//if (data.win || youLost()) data.copyButt.draw();
 }
 
 void updateDrawFrame()

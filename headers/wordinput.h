@@ -14,7 +14,7 @@ private:
 
     bool submit{false};
 
-    bool won{false};
+    bool gameOver{false};
 public:
     void init(BaseData* b);
     void update() override;
@@ -23,7 +23,7 @@ public:
     bool isSubmitting() { return submit; }
     std::string getWord() { return currentWord; }
 
-    void win() { won=true; }
+    void endGame() { gameOver=true; }
 };
 
 #endif

@@ -12,11 +12,6 @@ int getTheDay()
 std::string getTodaysWord()
 {
     static std::vector<std::string> words{
-        "PROUD",
-        "CHOSE",
-        "EAGLE",
-        "BIRTH",
-        "AHEAD",
         "SHIRT",
         "LYING",
         "READY",
@@ -336,6 +331,7 @@ std::string getTodaysWord()
         "CHILD",
         "BEGUN",
         "ALTER",
+        "EAGLE",
         "DATED",
         "FAITH",
         "SHARP",
@@ -507,8 +503,12 @@ std::string getTodaysWord()
         "PROOF",
         "ABUSE",
         "HAIRY",
+        "GREAT",
+        "PROUD",
         "TOWER",
-        "GREAT"
+        "CHOSE",
+        "BIRTH",
+        "AHEAD"
     };
     return words[getTheDay()%words.size()];
 }

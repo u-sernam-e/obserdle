@@ -25,7 +25,7 @@ void WordInput::update()
         currentLine += 1;
     }
 
-    if (!won)
+    if (!gameOver)
     {
         std::string charPressed{wordleGetKeysPressed("QWERTYUIOPASDFGHJKLZXCVBNM")};
         if (charPressed != "" && cursorPos < 5) // type letter
@@ -47,7 +47,7 @@ void WordInput::update()
 
 void WordInput::draw()
 {
-    if (!won)
+    if (!gameOver)
     {
         int yPos{75};
         for (int i{}; i < currentLine; ++i)
