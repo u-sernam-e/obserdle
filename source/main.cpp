@@ -46,27 +46,20 @@ Color letterState(char letter, int pos, std::string guess) // what a mess
 
 	int correctGuesses{};
 	for (int i{}; i < data.word.size(); ++i)
-		if (guess[i] == data.word[i] == letter) correctGuesses += 1;
-	
+		if (guess[i] == data.word[i] && guess[i] == letter) ++correctGuesses;
+		
 	int possibleYellows{lettersInWord.size() - correctGuesses};
-
+	std::cout << letter << ": " << correctGuesses << '\n';
 	for (int i{}; i < lettersInGuess.size(); ++i)
 	{
-		if (possibleYellows <= 0)
+		if (possibleYellows > 0)
 		{
-			lettersInGuess.erase(lettersInGuess.begin() + i);
-			--i;
+			if (lettersInGuess[i] == pos)
+				return GOLD;
+			--possibleYellows;
 		}
-		--possibleYellows;
-	}
-
-	for (int i{}; i < lettersInGuess.size(); ++i)
-	{
-		if (pos == lettersInGuess[i])
-		{
-			if (i < lettersInWord.size()) return GOLD;
-			else return GRAY;
-		}
+		else
+			return GRAY;
 	}
 
 	return GRAY;
@@ -95,19 +88,24 @@ bool youLost()
 void init()
 {
 	initBD(data.base);
-	//data.copyButt = Button{{188, 528}, {184, 69}, LIGHTGRAY, Color{190, 190, 190, 255}, Color{210, 210, 210, 255}, "COPY RESULTS", WHITE, false, false, false, {}, false, &data.base.fs, "res/Roboto.ttf"};
+	data.copyButt = Button{{188, 528}, {184, 69}, LIGHTGRAY, Color{190, 190, 190, 255}, Color{210, 210, 210, 255}, "Copy results", WHITE, false, false, false, {}, false, &data.base.fs, "res/Roboto.ttf"};
 	data.wrdInput.init(&data.base);
 	data.word = getTodaysWord();
 }
 
 void setObserdleClipboardText()
 {
+	std::string newLine{"\n"}; // this is stupid, its because of the difference in SetClipboardText() in desktop vs web builds
+#if defined(PLATFORM_WEB)
+	newLine = "\\n";
+#endif
+
 	std::string text{"🦅Daily Obserdle🦅 #"};
-	text.append(std::to_string(getTheDay() - 19698));
+	text.append(std::to_string(getTheDay() - 19701));
 	if (youLost())
-		text.append(" 😢/6\n\n");
+		text.append(" - 😢/6" + newLine + newLine);
 	else
-		text.append(" " + std::to_string(data.guessedWords.size()) + "/6\n\n");
+		text.append(" - " + std::to_string(data.guessedWords.size()) + "/6" + newLine + newLine);
 
 	for (int i{}; i < data.guessedWords.size(); ++i)
 	{
@@ -119,9 +117,9 @@ void setObserdleClipboardText()
 			if (stateCol == GREEN) text.append("🟩");
 
 		}
-		text.append("\n");
+		text.append(newLine);
 	}
-	text.append("\n(link to observer website)");
+	text.append(newLine + "(link to observer website)");
 
 	SetClipboardText(text.c_str());
 }
@@ -141,9 +139,9 @@ void update()
 	if (data.win || youLost())
 	{
 		data.wrdInput.endGame();
-		//data.copyButt.update();
-		//if (data.copyButt.pressed())
-			//setObserdleClipboardText();
+		data.copyButt.update();
+		if (data.copyButt.pressed())
+			setObserdleClipboardText();
 	}
 }
 
@@ -207,7 +205,7 @@ void draw()
 	drawBD(data.base);
 	if (data.win) drawWin();
 	if (youLost()) drawLoss();
-	//if (data.win || youLost()) data.copyButt.draw();
+	if (data.win || youLost()) data.copyButt.draw();
 }
 
 void updateDrawFrame()
