@@ -119,8 +119,7 @@ void setObserdleClipboardText()
 		}
 		text.append(newLine);
 	}
-	text.append(newLine + "(link to observer website)");
-
+	text.append(newLine + "https://sites.google.com/aacsapps.com/the-observer-aacs/fun-zone");
 	SetClipboardText(text.c_str());
 }
 
